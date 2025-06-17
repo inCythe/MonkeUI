@@ -197,7 +197,7 @@ function Window:CreateWindow()
     self.TabContainer = Instance.new("Frame")
     self.TabContainer.Name = "TabContainer"
     self.TabContainer.Size = UDim2.new(1, 0, 0, Config.Sizes.TabHeight)
-    self.TabContainer.Position = UDim2.new(0, 0, 0, 60)
+    self.TabContainer.Position = UDim2.new(0, 0, 0, 32)
     self.TabContainer.BackgroundTransparency = 1
     self.TabContainer.Parent = self.MainFrame
     
@@ -211,7 +211,7 @@ function Window:CreateWindow()
     self.ContentFrame = Instance.new("ScrollingFrame")
     self.ContentFrame.Name = "ContentFrame"
     self.ContentFrame.Size = UDim2.new(1, -12, 1, -76)
-    self.ContentFrame.Position = UDim2.new(0, 6, 0, 92)
+    self.ContentFrame.Position = UDim2.new(0, 6, 0, 64)
     self.ContentFrame.BackgroundTransparency = 1
     self.ContentFrame.BorderSizePixel = 0
     self.ContentFrame.ScrollBarThickness = isTouch and 8 or 3
@@ -229,24 +229,6 @@ function Window:CreateWindow()
         self.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 12)
     end)
     
-    -- Search Bar (new)
-    self.SearchBar = Instance.new("TextBox")
-    self.SearchBar.Name = "SearchBar"
-    self.SearchBar.Size = UDim2.new(1, -24, 0, 22)
-    self.SearchBar.Position = UDim2.new(0, 12, 0, 36)
-    self.SearchBar.BackgroundColor3 = Config.Colors.Background
-    self.SearchBar.BorderSizePixel = 0
-    self.SearchBar.Text = ""
-    self.SearchBar.PlaceholderText = "Search..."
-    self.SearchBar.TextColor3 = Config.Colors.TextSecondary
-    self.SearchBar.PlaceholderColor3 = Config.Colors.TextSecondary
-    self.SearchBar.TextScaled = true
-    self.SearchBar.Font = Enum.Font.Gotham
-    self.SearchBar.ClearTextOnFocus = false
-    self.SearchBar.Parent = self.MainFrame
-    CreateCorner(4).Parent = self.SearchBar
-    CreateStroke(Config.Colors.Border, 1).Parent = self.SearchBar
-    
     -- Make window draggable
     self:MakeDraggable()
     
@@ -257,42 +239,6 @@ function Window:CreateWindow()
     
     -- Add hover effects
     self:AddHoverEffect(self.CloseButton, Config.Colors.Destructive, Color3.fromRGB(220, 60, 50))
-    
-    -- Resizer (bottom-right corner)
-    self.Resizer = Instance.new("Frame")
-    self.Resizer.Name = "Resizer"
-    self.Resizer.Size = UDim2.new(0, 16, 0, 16)
-    self.Resizer.Position = UDim2.new(1, -16, 1, -16)
-    self.Resizer.BackgroundColor3 = Config.Colors.Border
-    self.Resizer.BackgroundTransparency = 0.3
-    self.Resizer.BorderSizePixel = 0
-    self.Resizer.Parent = self.MainFrame
-    self.Resizer.ZIndex = 10
-    CreateCorner(3).Parent = self.Resizer
-    
-    -- Resizer drag logic
-    local resizing = false
-    local resizeStart, frameStart
-    self.Resizer.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            resizing = true
-            resizeStart = input.Position
-            frameStart = self.MainFrame.Size
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - resizeStart
-            local newX = math.max(Config.Sizes.WindowMin.X, frameStart.X.Offset + delta.X)
-            local newY = math.max(Config.Sizes.WindowMin.Y, frameStart.Y.Offset + delta.Y)
-            self.MainFrame.Size = UDim2.new(0, newX, 0, newY)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            resizing = false
-        end
-    end)
 end
 
 function Window:MakeDraggable()
@@ -1253,31 +1199,6 @@ local function AddTooltip(instance, text)
         if tooltip then tooltip:Destroy() tooltip = nil end
     end)
 end
-
--- Search filter logic (filter components by label/text)
-function Window:FilterComponents(query)
-    query = string.lower(query)
-    for _, sectionList in pairs(self.Sections) do
-        for _, section in pairs(sectionList) do
-            local visible = false
-            for _, comp in ipairs(section.Components) do
-                local label = comp:FindFirstChild("TextLabel") or comp:FindFirstChild("SectionTitle")
-                if label and string.find(string.lower(label.Text), query) then
-                    comp.Visible = true
-                    visible = true
-                else
-                    comp.Visible = false
-                end
-            end
-            section.Frame.Visible = visible
-        end
-    end
-end
-
--- Connect search bar
-self.SearchBar:GetPropertyChangedSignal("Text"):Connect(function()
-    self:FilterComponents(self.SearchBar.Text)
-end)
 
 -- Add icon support utility
 local function AddIcon(parent, iconId, size, pos)

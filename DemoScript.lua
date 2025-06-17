@@ -1,5 +1,5 @@
 -- MonkeUI Demo Script
-local MonkeUI = require(script.Parent.MonkeUI)
+local MonkeUI = loadstring(game:HttpGet("https://raw.githubusercontent.com/inCythe/MonkeUI/refs/heads/main/MonkeUI.lua"))()
 
 -- Create window
 local window = MonkeUI:CreateWindow("MonkeUI Demo", "Main")
