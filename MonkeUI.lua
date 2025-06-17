@@ -30,34 +30,36 @@ MonkeUI.__index = MonkeUI
 
 -- Configuration
 local Config = {
-    -- Colors
+    -- Colors (updated for minimalism)
     Colors = {
-        Background = Color3.fromRGB(40, 42, 54),
-        Secondary = Color3.fromRGB(50, 54, 67),
-        Accent = Color3.fromRGB(255, 121, 63),
-        AccentHover = Color3.fromRGB(255, 135, 84),
-        Text = Color3.fromRGB(248, 248, 242),
-        TextSecondary = Color3.fromRGB(189, 195, 199),
+        Background = Color3.fromRGB(28, 28, 34),
+        Secondary = Color3.fromRGB(36, 36, 42),
+        Accent = Color3.fromRGB(100, 153, 255),
+        AccentHover = Color3.fromRGB(120, 173, 255),
+        Text = Color3.fromRGB(235, 235, 245),
+        TextSecondary = Color3.fromRGB(160, 160, 170),
         Success = Color3.fromRGB(80, 200, 120),
         Destructive = Color3.fromRGB(231, 76, 60),
-        Border = Color3.fromRGB(68, 71, 90),
-        Hover = Color3.fromRGB(60, 64, 77)
+        Border = Color3.fromRGB(44, 44, 54),
+        Hover = Color3.fromRGB(44, 48, 60),
+        Separator = Color3.fromRGB(50, 50, 60)
     },
     
     -- Animation settings
     Animation = {
-        Speed = 0.25,
-        Style = Enum.EasingStyle.Quart,
+        Speed = 0.18,
+        Style = Enum.EasingStyle.Quad,
         Direction = Enum.EasingDirection.Out
     },
     
-    -- Sizes
+    -- Sizes (more compact)
     Sizes = {
-        WindowMin = Vector2.new(600, 400),
-        TabHeight = 40,
-        SectionPadding = 10,
-        ComponentHeight = 35,
-        ComponentSpacing = 8
+        WindowMin = Vector2.new(480, 320),
+        TabHeight = 32,
+        SectionPadding = 6,
+        ComponentHeight = 26,
+        ComponentSpacing = 4,
+        SectionHeaderHeight = 28
     }
 }
 
@@ -123,53 +125,52 @@ function Window:CreateWindow()
     self.ScreenGui.ResetOnSpawn = false
     self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- Main Frame
+    -- Main Frame (compact, subtle shadow, less rounded)
     self.MainFrame = Instance.new("Frame")
     self.MainFrame.Name = "MainFrame"
-    self.MainFrame.Size = isTouch and UDim2.new(0.95, 0, 0.9, 0) or UDim2.new(0, 800, 0, 500)
-    self.MainFrame.Position = isTouch and UDim2.new(0.025, 0, 0.05, 0) or UDim2.new(0.5, -400, 0.5, -250)
+    self.MainFrame.Size = isTouch and UDim2.new(0.98, 0, 0.92, 0) or UDim2.new(0, 520, 0, 340)
+    self.MainFrame.Position = isTouch and UDim2.new(0.01, 0, 0.04, 0) or UDim2.new(0.5, -260, 0.5, -170)
     self.MainFrame.BackgroundColor3 = Config.Colors.Background
     self.MainFrame.BorderSizePixel = 0
     self.MainFrame.Parent = self.ScreenGui
 
-    CreateCorner(12).Parent = self.MainFrame
+    local shadow = Instance.new("ImageLabel")
+    shadow.Name = "Shadow"
+    shadow.BackgroundTransparency = 1
+    shadow.Image = "rbxassetid://1316045217"
+    shadow.ImageTransparency = 0.7
+    shadow.Size = UDim2.new(1, 16, 1, 16)
+    shadow.Position = UDim2.new(0, -8, 0, -8)
+    shadow.ZIndex = 0
+    shadow.Parent = self.MainFrame
+
+    CreateCorner(6).Parent = self.MainFrame
     CreateStroke(Config.Colors.Border, 1).Parent = self.MainFrame
-    
-    -- Add glass effect
-    local glassGradient = CreateGradient(ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
-        ColorSequenceKeypoint.new(1, Color3.new(0.9, 0.9, 0.9))
-    })
-    glassGradient.Transparency = NumberSequence.new{
-        NumberSequenceKeypoint.new(0, 0.95),
-        NumberSequenceKeypoint.new(1, 0.98)
-    }
-    glassGradient.Parent = self.MainFrame
-    
-    -- Title Bar
+
+    -- Title Bar (smaller, minimalist)
     self.TitleBar = Instance.new("Frame")
     self.TitleBar.Name = "TitleBar"
-    self.TitleBar.Size = UDim2.new(1, 0, 0, 40)
+    self.TitleBar.Size = UDim2.new(1, 0, 0, 32)
     self.TitleBar.Position = UDim2.new(0, 0, 0, 0)
     self.TitleBar.BackgroundColor3 = Config.Colors.Secondary
     self.TitleBar.BorderSizePixel = 0
     self.TitleBar.Parent = self.MainFrame
-    
-    CreateCorner(12).Parent = self.TitleBar
-    
-    -- Title corner fix
-    local titleCornerFix = Instance.new("Frame")
-    titleCornerFix.Size = UDim2.new(1, 0, 0, 12)
-    titleCornerFix.Position = UDim2.new(0, 0, 1, -12)
-    titleCornerFix.BackgroundColor3 = Config.Colors.Secondary
-    titleCornerFix.BorderSizePixel = 0
-    titleCornerFix.Parent = self.TitleBar
-    
-    -- Title Label
+    CreateCorner(6).Parent = self.TitleBar
+
+    -- Drag indicator
+    local dragIndicator = Instance.new("Frame")
+    dragIndicator.Size = UDim2.new(0, 36, 0, 4)
+    dragIndicator.Position = UDim2.new(0.5, -18, 0, 6)
+    dragIndicator.BackgroundColor3 = Config.Colors.Border
+    dragIndicator.BorderSizePixel = 0
+    dragIndicator.Parent = self.TitleBar
+    CreateCorner(2).Parent = dragIndicator
+
+    -- Title Label (bolder, minimalist)
     self.TitleLabel = Instance.new("TextLabel")
     self.TitleLabel.Name = "TitleLabel"
-    self.TitleLabel.Size = UDim2.new(1, -100, 1, 0)
-    self.TitleLabel.Position = UDim2.new(0, 15, 0, 0)
+    self.TitleLabel.Size = UDim2.new(1, -80, 1, 0)
+    self.TitleLabel.Position = UDim2.new(0, 16, 0, 0)
     self.TitleLabel.BackgroundTransparency = 1
     self.TitleLabel.Text = self.Title
     self.TitleLabel.TextColor3 = Config.Colors.Text
@@ -177,12 +178,12 @@ function Window:CreateWindow()
     self.TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     self.TitleLabel.Font = Enum.Font.GothamBold
     self.TitleLabel.Parent = self.TitleBar
-    
-    -- Close Button
+
+    -- Close Button (minimalist)
     self.CloseButton = Instance.new("TextButton")
     self.CloseButton.Name = "CloseButton"
-    self.CloseButton.Size = UDim2.new(0, 30, 0, 30)
-    self.CloseButton.Position = UDim2.new(1, -40, 0, 5)
+    self.CloseButton.Size = UDim2.new(0, 24, 0, 24)
+    self.CloseButton.Position = UDim2.new(1, -32, 0.5, -12)
     self.CloseButton.BackgroundColor3 = Config.Colors.Destructive
     self.CloseButton.BorderSizePixel = 0
     self.CloseButton.Text = "×"
@@ -190,14 +191,13 @@ function Window:CreateWindow()
     self.CloseButton.TextScaled = true
     self.CloseButton.Font = Enum.Font.GothamBold
     self.CloseButton.Parent = self.TitleBar
+    CreateCorner(4).Parent = self.CloseButton
     
-    CreateCorner(6).Parent = self.CloseButton
-    
-    -- Tab Container
+    -- Tab Container (smaller)
     self.TabContainer = Instance.new("Frame")
     self.TabContainer.Name = "TabContainer"
     self.TabContainer.Size = UDim2.new(1, 0, 0, Config.Sizes.TabHeight)
-    self.TabContainer.Position = UDim2.new(0, 0, 0, 40)
+    self.TabContainer.Position = UDim2.new(0, 0, 0, 60)
     self.TabContainer.BackgroundTransparency = 1
     self.TabContainer.Parent = self.MainFrame
     
@@ -207,14 +207,14 @@ function Window:CreateWindow()
     tabLayout.Padding = UDim.new(0, 2)
     tabLayout.Parent = self.TabContainer
     
-    -- Content Frame
+    -- Content Frame (smaller padding)
     self.ContentFrame = Instance.new("ScrollingFrame")
     self.ContentFrame.Name = "ContentFrame"
-    self.ContentFrame.Size = UDim2.new(1, -20, 1, -90)
-    self.ContentFrame.Position = UDim2.new(0, 10, 0, 80)
+    self.ContentFrame.Size = UDim2.new(1, -12, 1, -76)
+    self.ContentFrame.Position = UDim2.new(0, 6, 0, 92)
     self.ContentFrame.BackgroundTransparency = 1
     self.ContentFrame.BorderSizePixel = 0
-    self.ContentFrame.ScrollBarThickness = isTouch and 12 or 4
+    self.ContentFrame.ScrollBarThickness = isTouch and 8 or 3
     self.ContentFrame.ScrollBarImageColor3 = Config.Colors.Accent
     self.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
     self.ContentFrame.Parent = self.MainFrame
@@ -226,8 +226,26 @@ function Window:CreateWindow()
     
     -- Auto-resize canvas
     contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        self.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+        self.ContentFrame.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 12)
     end)
+    
+    -- Search Bar (new)
+    self.SearchBar = Instance.new("TextBox")
+    self.SearchBar.Name = "SearchBar"
+    self.SearchBar.Size = UDim2.new(1, -24, 0, 22)
+    self.SearchBar.Position = UDim2.new(0, 12, 0, 36)
+    self.SearchBar.BackgroundColor3 = Config.Colors.Background
+    self.SearchBar.BorderSizePixel = 0
+    self.SearchBar.Text = ""
+    self.SearchBar.PlaceholderText = "Search..."
+    self.SearchBar.TextColor3 = Config.Colors.TextSecondary
+    self.SearchBar.PlaceholderColor3 = Config.Colors.TextSecondary
+    self.SearchBar.TextScaled = true
+    self.SearchBar.Font = Enum.Font.Gotham
+    self.SearchBar.ClearTextOnFocus = false
+    self.SearchBar.Parent = self.MainFrame
+    CreateCorner(4).Parent = self.SearchBar
+    CreateStroke(Config.Colors.Border, 1).Parent = self.SearchBar
     
     -- Make window draggable
     self:MakeDraggable()
@@ -239,6 +257,42 @@ function Window:CreateWindow()
     
     -- Add hover effects
     self:AddHoverEffect(self.CloseButton, Config.Colors.Destructive, Color3.fromRGB(220, 60, 50))
+    
+    -- Resizer (bottom-right corner)
+    self.Resizer = Instance.new("Frame")
+    self.Resizer.Name = "Resizer"
+    self.Resizer.Size = UDim2.new(0, 16, 0, 16)
+    self.Resizer.Position = UDim2.new(1, -16, 1, -16)
+    self.Resizer.BackgroundColor3 = Config.Colors.Border
+    self.Resizer.BackgroundTransparency = 0.3
+    self.Resizer.BorderSizePixel = 0
+    self.Resizer.Parent = self.MainFrame
+    self.Resizer.ZIndex = 10
+    CreateCorner(3).Parent = self.Resizer
+    
+    -- Resizer drag logic
+    local resizing = false
+    local resizeStart, frameStart
+    self.Resizer.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            resizing = true
+            resizeStart = input.Position
+            frameStart = self.MainFrame.Size
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local delta = input.Position - resizeStart
+            local newX = math.max(Config.Sizes.WindowMin.X, frameStart.X.Offset + delta.X)
+            local newY = math.max(Config.Sizes.WindowMin.Y, frameStart.Y.Offset + delta.Y)
+            self.MainFrame.Size = UDim2.new(0, newX, 0, newY)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            resizing = false
+        end
+    end)
 end
 
 function Window:MakeDraggable()
@@ -358,60 +412,87 @@ function Window:CreateSection(name)
         warn("No tab selected. Create a tab first.")
         return
     end
-    
     if not self.Sections[self.CurrentTab] then
         self.Sections[self.CurrentTab] = {}
     end
-    
     local section = {}
     section.Name = name
     section.Components = {}
-    
-    -- Section Frame
+    section.Collapsed = false
+    -- Section Frame (minimalist, compact)
     section.Frame = Instance.new("Frame")
     section.Frame.Name = "Section_" .. name
-    section.Frame.Size = UDim2.new(1, 0, 0, 100)
+    section.Frame.Size = UDim2.new(1, 0, 0, 60)
     section.Frame.BackgroundColor3 = Config.Colors.Secondary
     section.Frame.BorderSizePixel = 0
     section.Frame.LayoutOrder = #self.Sections[self.CurrentTab] + 1
-    
-    CreateCorner(8).Parent = section.Frame
+    CreateCorner(4).Parent = section.Frame
     CreateStroke(Config.Colors.Border, 1).Parent = section.Frame
-    
+    -- Section Header (collapsible)
+    section.Header = Instance.new("Frame")
+    section.Header.Name = "SectionHeader"
+    section.Header.Size = UDim2.new(1, 0, 0, Config.Sizes.SectionHeaderHeight)
+    section.Header.BackgroundTransparency = 1
+    section.Header.Parent = section.Frame
+    -- Collapse Button
+    section.CollapseButton = Instance.new("TextButton")
+    section.CollapseButton.Size = UDim2.new(0, 22, 0, 22)
+    section.CollapseButton.Position = UDim2.new(0, 4, 0.5, -11)
+    section.CollapseButton.BackgroundTransparency = 1
+    section.CollapseButton.Text = "▼"
+    section.CollapseButton.TextColor3 = Config.Colors.TextSecondary
+    section.CollapseButton.TextScaled = true
+    section.CollapseButton.Font = Enum.Font.GothamBold
+    section.CollapseButton.Parent = section.Header
     -- Section Title
     section.Title = Instance.new("TextLabel")
     section.Title.Name = "SectionTitle"
-    section.Title.Size = UDim2.new(1, -20, 0, 30)
-    section.Title.Position = UDim2.new(0, 10, 0, 5)
+    section.Title.Size = UDim2.new(1, -32, 1, 0)
+    section.Title.Position = UDim2.new(0, 32, 0, 0)
     section.Title.BackgroundTransparency = 1
     section.Title.Text = name
     section.Title.TextColor3 = Config.Colors.Text
     section.Title.TextScaled = true
     section.Title.TextXAlignment = Enum.TextXAlignment.Left
     section.Title.Font = Enum.Font.GothamBold
-    section.Title.Parent = section.Frame
-    
+    section.Title.Parent = section.Header
+    -- Separator
+    local separator = Instance.new("Frame")
+    separator.Size = UDim2.new(1, -8, 0, 1)
+    separator.Position = UDim2.new(0, 4, 1, -1)
+    separator.BackgroundColor3 = Config.Colors.Separator
+    separator.BorderSizePixel = 0
+    separator.Parent = section.Header
     -- Component Container
     section.Container = Instance.new("Frame")
     section.Container.Name = "ComponentContainer"
-    section.Container.Size = UDim2.new(1, -20, 1, -40)
-    section.Container.Position = UDim2.new(0, 10, 0, 35)
+    section.Container.Size = UDim2.new(1, 0, 1, -Config.Sizes.SectionHeaderHeight)
+    section.Container.Position = UDim2.new(0, 0, 0, Config.Sizes.SectionHeaderHeight)
     section.Container.BackgroundTransparency = 1
     section.Container.Parent = section.Frame
-    
     local layout = Instance.new("UIListLayout")
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.Padding = UDim.new(0, Config.Sizes.ComponentSpacing)
     layout.Parent = section.Container
-    
-    -- Auto-resize section
     layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        section.Frame.Size = UDim2.new(1, 0, 0, layout.AbsoluteContentSize.Y + 50)
+        if not section.Collapsed then
+            section.Frame.Size = UDim2.new(1, 0, 0, layout.AbsoluteContentSize.Y + Config.Sizes.SectionHeaderHeight + 8)
+        end
     end)
-    
+    section.CollapseButton.MouseButton1Click:Connect(function()
+        section.Collapsed = not section.Collapsed
+        if section.Collapsed then
+            section.Container.Visible = false
+            section.Frame.Size = UDim2.new(1, 0, 0, Config.Sizes.SectionHeaderHeight + 4)
+            section.CollapseButton.Text = "►"
+        else
+            section.Container.Visible = true
+            section.Frame.Size = UDim2.new(1, 0, 0, layout.AbsoluteContentSize.Y + Config.Sizes.SectionHeaderHeight + 8)
+            section.CollapseButton.Text = "▼"
+        end
+    end)
     section.Frame.Parent = self.ContentFrame
     self.Sections[self.CurrentTab][name] = section
-    
     return section
 end
 
@@ -444,6 +525,7 @@ function Window:AddButton(sectionName, text, callback, style)
     end)
     
     table.insert(section.Components, button)
+    AddTooltip(button, text)
     return button
 end
 
@@ -1111,6 +1193,57 @@ function MonkeUI:SetTheme(newColors)
         end
     end
 end
+
+-- Tooltip utility
+local function AddTooltip(instance, text)
+    local tooltip
+    instance.MouseEnter:Connect(function()
+        tooltip = Instance.new("TextLabel")
+        tooltip.Name = "Tooltip"
+        tooltip.Size = UDim2.new(0, 0, 0, 22)
+        tooltip.Position = UDim2.new(0, 0, 0, -26)
+        tooltip.BackgroundColor3 = Config.Colors.Secondary
+        tooltip.TextColor3 = Config.Colors.TextSecondary
+        tooltip.Text = text
+        tooltip.TextScaled = true
+        tooltip.Font = Enum.Font.Gotham
+        tooltip.BackgroundTransparency = 0.1
+        tooltip.BorderSizePixel = 0
+        tooltip.ZIndex = 100
+        tooltip.Parent = instance
+        CreateCorner(3).Parent = tooltip
+        CreateStroke(Config.Colors.Border, 1).Parent = tooltip
+        CreateTween(tooltip, {Size = UDim2.new(0, math.max(60, #text * 8), 0, 22)}, 0.12):Play()
+    end)
+    instance.MouseLeave:Connect(function()
+        if tooltip then tooltip:Destroy() tooltip = nil end
+    end)
+end
+
+-- Search filter logic (filter components by label/text)
+function Window:FilterComponents(query)
+    query = string.lower(query)
+    for _, sectionList in pairs(self.Sections) do
+        for _, section in pairs(sectionList) do
+            local visible = false
+            for _, comp in ipairs(section.Components) do
+                local label = comp:FindFirstChild("TextLabel") or comp:FindFirstChild("SectionTitle")
+                if label and string.find(string.lower(label.Text), query) then
+                    comp.Visible = true
+                    visible = true
+                else
+                    comp.Visible = false
+                end
+            end
+            section.Frame.Visible = visible
+        end
+    end
+end
+
+-- Connect search bar
+self.SearchBar:GetPropertyChangedSignal("Text"):Connect(function()
+    self:FilterComponents(self.SearchBar.Text)
+end)
 
 -- Return the library
 return MonkeUI
