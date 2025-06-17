@@ -529,17 +529,15 @@ function Window:AddButton(sectionName, text, callback, style)
     return button
 end
 
-function Window:AddToggle(sectionName, text, default, callback)
+function Window:AddToggle(sectionName, text, default, callback, iconId)
     local section = self.Sections[self.CurrentTab] and self.Sections[self.CurrentTab][sectionName]
     if not section then return end
-    
     local toggle = Instance.new("Frame")
     toggle.Name = "Toggle_" .. text
     toggle.Size = UDim2.new(1, 0, 0, Config.Sizes.ComponentHeight)
     toggle.BackgroundTransparency = 1
     toggle.LayoutOrder = #section.Components + 1
     toggle.Parent = section.Container
-    
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -60, 1, 0)
     label.Position = UDim2.new(0, 0, 0, 0)
@@ -550,7 +548,7 @@ function Window:AddToggle(sectionName, text, default, callback)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Font = Enum.Font.Gotham
     label.Parent = toggle
-    
+    if iconId then AddIcon(label, iconId, UDim2.new(0, 18, 0, 18), UDim2.new(0, -22, 0.5, -9)) end
     local toggleButton = Instance.new("TextButton")
     toggleButton.Size = UDim2.new(0, 50, 0, 25)
     toggleButton.Position = UDim2.new(1, -50, 0.5, -12.5)
@@ -558,32 +556,24 @@ function Window:AddToggle(sectionName, text, default, callback)
     toggleButton.BorderSizePixel = 0
     toggleButton.Text = ""
     toggleButton.Parent = toggle
-    
     CreateCorner(12).Parent = toggleButton
-    
     local indicator = Instance.new("Frame")
     indicator.Size = UDim2.new(0, 21, 0, 21)
     indicator.Position = default and UDim2.new(1, -23, 0, 2) or UDim2.new(0, 2, 0, 2)
     indicator.BackgroundColor3 = Color3.new(1, 1, 1)
     indicator.BorderSizePixel = 0
     indicator.Parent = toggleButton
-    
     CreateCorner(10).Parent = indicator
-    
     local state = default or false
-    
     toggleButton.MouseButton1Click:Connect(function()
         state = not state
-        
         local newColor = state and Config.Colors.Success or Config.Colors.Border
         local newPos = state and UDim2.new(1, -23, 0, 2) or UDim2.new(0, 2, 0, 2)
-        
         CreateTween(toggleButton, {BackgroundColor3 = newColor}):Play()
         CreateTween(indicator, {Position = newPos}):Play()
-        
         if callback then callback(state) end
     end)
-    
+    AddTooltip(toggleButton, text)
     table.insert(section.Components, toggle)
     return toggle, function() return state end
 end
@@ -689,17 +679,15 @@ function Window:AddSlider(sectionName, text, min, max, default, callback)
     return slider, function() return value end
 end
 
-function Window:AddDropdown(sectionName, text, options, default, callback)
+function Window:AddDropdown(sectionName, text, options, default, callback, iconId)
     local section = self.Sections[self.CurrentTab] and self.Sections[self.CurrentTab][sectionName]
     if not section then return end
-    
     local dropdown = Instance.new("Frame")
     dropdown.Name = "Dropdown_" .. text
     dropdown.Size = UDim2.new(1, 0, 0, Config.Sizes.ComponentHeight)
     dropdown.BackgroundTransparency = 1
     dropdown.LayoutOrder = #section.Components + 1
     dropdown.Parent = section.Container
-    
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(0.4, 0, 1, 0)
     label.Position = UDim2.new(0, 0, 0, 0)
@@ -710,7 +698,7 @@ function Window:AddDropdown(sectionName, text, options, default, callback)
     label.TextXAlignment = Enum.TextXAlignment.Left
     label.Font = Enum.Font.Gotham
     label.Parent = dropdown
-    
+    if iconId then AddIcon(label, iconId, UDim2.new(0, 18, 0, 18), UDim2.new(0, -22, 0.5, -9)) end
     local dropdownButton = Instance.new("TextButton")
     dropdownButton.Size = UDim2.new(0.6, -10, 1, 0)
     dropdownButton.Position = UDim2.new(0.4, 5, 0, 0)
@@ -721,10 +709,8 @@ function Window:AddDropdown(sectionName, text, options, default, callback)
     dropdownButton.TextScaled = true
     dropdownButton.Font = Enum.Font.Gotham
     dropdownButton.Parent = dropdown
-    
     CreateCorner(6).Parent = dropdownButton
     CreateStroke(Config.Colors.Border, 1).Parent = dropdownButton
-    
     local arrow = Instance.new("TextLabel")
     arrow.Size = UDim2.new(0, 20, 1, 0)
     arrow.Position = UDim2.new(1, -25, 0, 0)
@@ -734,61 +720,76 @@ function Window:AddDropdown(sectionName, text, options, default, callback)
     arrow.TextScaled = true
     arrow.Font = Enum.Font.Gotham
     arrow.Parent = dropdownButton
-    
     local dropdownList = Instance.new("Frame")
-    dropdownList.Size = UDim2.new(1, 0, 0, #options * 30)
+    dropdownList.Size = UDim2.new(1, 0, 0, #options * 30 + 30)
     dropdownList.Position = UDim2.new(0, 0, 1, 5)
     dropdownList.BackgroundColor3 = Config.Colors.Background
     dropdownList.BorderSizePixel = 0
     dropdownList.Visible = false
     dropdownList.ZIndex = 10
     dropdownList.Parent = dropdownButton
-    
     CreateCorner(6).Parent = dropdownList
     CreateStroke(Config.Colors.Border, 1).Parent = dropdownList
-    
     local listLayout = Instance.new("UIListLayout")
     listLayout.SortOrder = Enum.SortOrder.LayoutOrder
     listLayout.Parent = dropdownList
-    
-    local currentValue = default or options[1]
-    local isOpen = false
-    
-    for i, option in ipairs(options) do
-        local optionButton = Instance.new("TextButton")
-        optionButton.Size = UDim2.new(1, 0, 0, 30)
-        optionButton.BackgroundColor3 = Config.Colors.Background
-        optionButton.BorderSizePixel = 0
-        optionButton.Text = option
-        optionButton.TextColor3 = Config.Colors.Text
-        optionButton.TextScaled = true
-        optionButton.Font = Enum.Font.Gotham
-        optionButton.LayoutOrder = i
-        optionButton.Parent = dropdownList
-        
-        self:AddHoverEffect(optionButton, Config.Colors.Background, Config.Colors.Hover)
-        
-        optionButton.MouseButton1Click:Connect(function()
-            currentValue = option
-            dropdownButton.Text = option
-            dropdownList.Visible = false
-            isOpen = false
-            CreateTween(arrow, {Rotation = 0}):Play()
-            
-            if callback then callback(option) end
-        end)
+    -- Dropdown search bar
+    local searchBox = Instance.new("TextBox")
+    searchBox.Size = UDim2.new(1, -8, 0, 24)
+    searchBox.Position = UDim2.new(0, 4, 0, 3)
+    searchBox.BackgroundColor3 = Config.Colors.Secondary
+    searchBox.TextColor3 = Config.Colors.TextSecondary
+    searchBox.PlaceholderText = "Search..."
+    searchBox.TextScaled = true
+    searchBox.Font = Enum.Font.Gotham
+    searchBox.BorderSizePixel = 0
+    searchBox.Parent = dropdownList
+    CreateCorner(3).Parent = searchBox
+    local optionButtons = {}
+    local function refreshOptions(filter)
+        for _, btn in ipairs(optionButtons) do btn:Destroy() end
+        optionButtons = {}
+        for i, option in ipairs(options) do
+            if not filter or string.find(string.lower(option), string.lower(filter)) then
+                local optionButton = Instance.new("TextButton")
+                optionButton.Size = UDim2.new(1, 0, 0, 30)
+                optionButton.BackgroundColor3 = Config.Colors.Background
+                optionButton.BorderSizePixel = 0
+                optionButton.Text = option
+                optionButton.TextColor3 = Config.Colors.Text
+                optionButton.TextScaled = true
+                optionButton.Font = Enum.Font.Gotham
+                optionButton.LayoutOrder = i + 1
+                optionButton.Parent = dropdownList
+                AddTooltip(optionButton, option)
+                optionButton.MouseButton1Click:Connect(function()
+                    dropdownButton.Text = option
+                    dropdownList.Visible = false
+                    CreateTween(dropdownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.15):Play()
+                    if callback then callback(option) end
+                end)
+                table.insert(optionButtons, optionButton)
+            end
+        end
     end
-    
+    refreshOptions()
+    searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        refreshOptions(searchBox.Text)
+    end)
+    local isOpen = false
     dropdownButton.MouseButton1Click:Connect(function()
         isOpen = not isOpen
         dropdownList.Visible = isOpen
+        if isOpen then
+            CreateTween(dropdownList, {Size = UDim2.new(1, 0, 0, #options * 30 + 30)}, 0.15):Play()
+        else
+            CreateTween(dropdownList, {Size = UDim2.new(1, 0, 0, 0)}, 0.15):Play()
+        end
         CreateTween(arrow, {Rotation = isOpen and 180 or 0}):Play()
     end)
-    
-    self:AddHoverEffect(dropdownButton, Config.Colors.Background, Config.Colors.Hover)
-    
+    AddTooltip(dropdownButton, text)
     table.insert(section.Components, dropdown)
-    return dropdown, function() return currentValue end
+    return dropdown, function() return dropdownButton.Text end
 end
 
 function Window:AddInput(sectionName, text, placeholder, callback)
@@ -1120,23 +1121,22 @@ function Window:AddStatus(sectionName, text, status)
     end
 end
 
-function Window:CreateNotification(title, content, duration)
+function Window:CreateNotification(title, content, duration, iconId)
     duration = duration or 3
-    
+    if not self._notifications then self._notifications = {} end
     local notification = Instance.new("Frame")
     notification.Name = "Notification"
     notification.Size = UDim2.new(0, 300, 0, 80)
-    notification.Position = UDim2.new(1, -320, 1, -100)
+    notification.Position = UDim2.new(1, -320, 1, -100 - (#self._notifications * 90))
     notification.BackgroundColor3 = Config.Colors.Secondary
     notification.BorderSizePixel = 0
     notification.Parent = self.ScreenGui
-    
     CreateCorner(8).Parent = notification
     CreateStroke(Config.Colors.Border, 1).Parent = notification
-    
+    if iconId then AddIcon(notification, iconId, UDim2.new(0, 28, 0, 28), UDim2.new(0, 8, 0, 8)) end
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -10, 0, 25)
-    titleLabel.Position = UDim2.new(0, 5, 0, 5)
+    titleLabel.Position = UDim2.new(0, 40, 0, 5)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = title
     titleLabel.TextColor3 = Config.Colors.Text
@@ -1144,10 +1144,9 @@ function Window:CreateNotification(title, content, duration)
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Font = Enum.Font.GothamBold
     titleLabel.Parent = notification
-    
     local contentLabel = Instance.new("TextLabel")
     contentLabel.Size = UDim2.new(1, -10, 1, -30)
-    contentLabel.Position = UDim2.new(0, 5, 0, 25)
+    contentLabel.Position = UDim2.new(0, 40, 0, 25)
     contentLabel.BackgroundTransparency = 1
     contentLabel.Text = content
     contentLabel.TextColor3 = Config.Colors.TextSecondary
@@ -1157,16 +1156,51 @@ function Window:CreateNotification(title, content, duration)
     contentLabel.Font = Enum.Font.Gotham
     contentLabel.TextSize = 12
     contentLabel.Parent = notification
-    
+    -- Dismiss button
+    local dismiss = Instance.new("TextButton")
+    dismiss.Size = UDim2.new(0, 24, 0, 24)
+    dismiss.Position = UDim2.new(1, -28, 0, 8)
+    dismiss.BackgroundColor3 = Config.Colors.Destructive
+    dismiss.Text = "×"
+    dismiss.TextColor3 = Color3.new(1, 1, 1)
+    dismiss.TextScaled = true
+    dismiss.Font = Enum.Font.GothamBold
+    dismiss.BorderSizePixel = 0
+    dismiss.Parent = notification
+    CreateCorner(4).Parent = dismiss
+    dismiss.MouseButton1Click:Connect(function()
+        notification:Destroy()
+        for i, n in ipairs(self._notifications) do
+            if n == notification then
+                table.remove(self._notifications, i)
+                break
+            end
+        end
+        -- Move up remaining notifications
+        for i, n in ipairs(self._notifications) do
+            CreateTween(n, {Position = UDim2.new(1, -320, 1, -100 - ((i-1) * 90))}, 0.2):Play()
+        end
+    end)
+    table.insert(self._notifications, notification)
     -- Slide in animation
-    notification.Position = UDim2.new(1, 0, 1, -100)
-    CreateTween(notification, {Position = UDim2.new(1, -320, 1, -100)}, 0.3):Play()
-    
+    notification.Position = UDim2.new(1, 0, 1, -100 - ((#self._notifications-1) * 90))
+    CreateTween(notification, {Position = UDim2.new(1, -320, 1, -100 - ((#self._notifications-1) * 90))}, 0.3):Play()
     -- Auto dismiss
-    task.wait(duration)
-    CreateTween(notification, {Position = UDim2.new(1, 0, 1, -100)}, 0.3):Play()
-    task.wait(0.3)
-    notification:Destroy()
+    task.spawn(function()
+        task.wait(duration)
+        if notification.Parent then
+            notification:Destroy()
+            for i, n in ipairs(self._notifications) do
+                if n == notification then
+                    table.remove(self._notifications, i)
+                    break
+                end
+            end
+            for i, n in ipairs(self._notifications) do
+                CreateTween(n, {Position = UDim2.new(1, -320, 1, -100 - ((i-1) * 90))}, 0.2):Play()
+            end
+        end
+    end)
 end
 
 function Window:Destroy()
@@ -1244,6 +1278,71 @@ end
 self.SearchBar:GetPropertyChangedSignal("Text"):Connect(function()
     self:FilterComponents(self.SearchBar.Text)
 end)
+
+-- Add icon support utility
+local function AddIcon(parent, iconId, size, pos)
+    if not iconId then return end
+    local icon = Instance.new("ImageLabel")
+    icon.Name = "Icon"
+    icon.Image = iconId
+    icon.Size = size or UDim2.new(0, 18, 0, 18)
+    icon.Position = pos or UDim2.new(0, 4, 0.5, -9)
+    icon.BackgroundTransparency = 1
+    icon.BorderSizePixel = 0
+    icon.Parent = parent
+    icon.ZIndex = parent.ZIndex + 1
+    return icon
+end
+
+-- Add theme switching
+MonkeUI.Themes = {
+    Dark = {
+        Background = Color3.fromRGB(28, 28, 34),
+        Secondary = Color3.fromRGB(36, 36, 42),
+        Accent = Color3.fromRGB(100, 153, 255),
+        AccentHover = Color3.fromRGB(120, 173, 255),
+        Text = Color3.fromRGB(235, 235, 245),
+        TextSecondary = Color3.fromRGB(160, 160, 170),
+        Success = Color3.fromRGB(80, 200, 120),
+        Destructive = Color3.fromRGB(231, 76, 60),
+        Border = Color3.fromRGB(44, 44, 54),
+        Hover = Color3.fromRGB(44, 48, 60),
+        Separator = Color3.fromRGB(50, 50, 60)
+    },
+    Light = {
+        Background = Color3.fromRGB(245, 245, 250),
+        Secondary = Color3.fromRGB(230, 230, 240),
+        Accent = Color3.fromRGB(100, 153, 255),
+        AccentHover = Color3.fromRGB(120, 173, 255),
+        Text = Color3.fromRGB(40, 40, 50),
+        TextSecondary = Color3.fromRGB(120, 120, 130),
+        Success = Color3.fromRGB(80, 200, 120),
+        Destructive = Color3.fromRGB(231, 76, 60),
+        Border = Color3.fromRGB(200, 200, 220),
+        Hover = Color3.fromRGB(220, 220, 240),
+        Separator = Color3.fromRGB(210, 210, 230)
+    },
+    Minimal = {
+        Background = Color3.fromRGB(255, 255, 255),
+        Secondary = Color3.fromRGB(245, 245, 245),
+        Accent = Color3.fromRGB(0, 0, 0),
+        AccentHover = Color3.fromRGB(40, 40, 40),
+        Text = Color3.fromRGB(0, 0, 0),
+        TextSecondary = Color3.fromRGB(120, 120, 120),
+        Success = Color3.fromRGB(80, 200, 120),
+        Destructive = Color3.fromRGB(231, 76, 60),
+        Border = Color3.fromRGB(220, 220, 220),
+        Hover = Color3.fromRGB(230, 230, 230),
+        Separator = Color3.fromRGB(230, 230, 230)
+    }
+}
+function MonkeUI:SwitchTheme(themeName)
+    local theme = MonkeUI.Themes[themeName]
+    if not theme then return end
+    for k, v in pairs(theme) do
+        Config.Colors[k] = v
+    end
+end
 
 -- Return the library
 return MonkeUI
